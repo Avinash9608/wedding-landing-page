@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Logo from "../assets/logo.png";
 import { MdMenu } from "react-icons/md";
 import { FaRegUser } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { UpdateFollower } from "react-mouse-follower";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
 const NavbarMenu = [
   {
@@ -36,10 +36,37 @@ const NavbarMenu = [
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+
+  const handleNavigation = (link) => {
+    if (link.startsWith("#")) {
+      // Handle section scrolling
+      const sectionId = link.substring(1); // Remove the "#"
+      const sectionElement = document.getElementById(sectionId);
+      if (sectionElement) {
+        sectionElement.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      // Handle route navigation
+      navigate(link);
+    }
+  };
+
+  useEffect(() => {
+    // Scroll to the section if the URL contains a hash
+    if (location.hash) {
+      const sectionId = location.hash.substring(1); // Remove the "#"
+      const sectionElement = document.getElementById(sectionId);
+      if (sectionElement) {
+        sectionElement.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }, [location]);
 
   return (
     <div className="text-white py-8">
@@ -73,7 +100,11 @@ const Navbar = () => {
                   }}
                 >
                   <a
-                    href={item.link} // This now links to the specific section IDs
+                    href={item.link}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleNavigation(item.link);
+                    }}
                     className="inline-block text-base font-semibold py-2 px-3 uppercase"
                   >
                     {item.title}
@@ -117,9 +148,13 @@ const Navbar = () => {
           {NavbarMenu.map((item) => (
             <li key={item.id}>
               <a
-                href={item.link} // This now links to the specific section IDs
+                href={item.link}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavigation(item.link);
+                  toggleMenu();
+                }}
                 className="text-lg font-semibold py-2 px-3 uppercase"
-                onClick={toggleMenu}
               >
                 {item.title}
               </a>
